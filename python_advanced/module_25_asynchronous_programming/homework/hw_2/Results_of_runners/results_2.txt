@@ -1,0 +1,4 @@
+Downloaded 50 by processes in 17.257 s.
+Downloaded 50 by threads in 11.645 s.
+Downloaded 50 by async in 7.610 s.
+[==----------------------------------==]

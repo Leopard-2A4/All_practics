@@ -1,0 +1,39 @@
+{% extends "myauth/base.html" %}
+
+{% block title %}
+    About me
+{% endblock %}
+
+{% block body %}
+    <h1>User info</h1>
+    {% if user.is_authenticated %}
+        <h2>Details</h2>
+        <p>Username: {{ user.username }}</p>
+        <p>first name: {{ user.first_name }}</p>
+        <p>Last_name: {{ user.last_name }}</p>
+        <p>Email: {{ user.email }}</p>
+        <p>Bio: {{ user.profile.bio }}</p>
+        {% if user.profile.avatar %}
+            <img src="{{ user.profile.url }}" alt="{{ user.profile.pk }}">
+        {% else %}
+            <p> No avatars yet</p>
+        <a href="{% url 'myauth:update-my-avatar' %}">Update my avatar</a>
+        {% endif %}
+        <br>
+        <a href="{% url 'myauth:users-list' %}">
+        See the list of users</a>
+        <div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit">
+                Submit
+            </button>
+        </form>
+        </div>
+    {% else %}
+        <h2>User is anonymous</h2>
+    {% endif %}
+{% endblock %}

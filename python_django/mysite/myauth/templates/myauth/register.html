@@ -1,0 +1,16 @@
+{% extends 'shopapp/base.html' %}
+
+{% block title %}
+    Registration
+{% endblock %}
+
+{% block body %}
+<div>
+    <h1>Register</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Register">
+    </form>
+</div>
+{% endblock %}

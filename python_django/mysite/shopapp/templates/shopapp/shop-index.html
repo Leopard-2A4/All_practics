@@ -1,0 +1,21 @@
+{% extends 'shopapp/base.html' %}
+
+{% block title %}
+Hello world !
+{% endblock %}
+
+{% block body %}
+<h1>
+    Some content: {{ Some_text|title }}
+</h1>
+<div>
+    Url's of our shop:
+</div>
+<div>
+    /shop/products/ - if you need list of products
+</div>
+<div>
+    /shop/orders/ - if you need to list of orders
+</div>
+
+{% endblock %}

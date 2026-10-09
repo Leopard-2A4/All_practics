@@ -1,0 +1,35 @@
+services:
+  flask-app:
+    build: ./flask-app
+    container_name: flask-gunicorn-container
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres-db:5432/skillbox_db
+    depends_on:
+      - postgres-db
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: skillbox_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

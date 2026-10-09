@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="books-list">
+    <h1>Книги автора: {{ author_name.title() }}</h1>
+
+    {% if books %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Автор</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>{{ book['id'] }}</td>
+                    <td>{{ book['title'] }}</td>
+                    <td>{{ book['author'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Книг этого автора нет в базе данных.</p>
+    {% endif %}
+
+    <a href="/books">← Вернуться к списку всех книг</a>
+</div>
+{% endblock %}

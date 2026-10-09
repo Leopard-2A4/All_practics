@@ -1,0 +1,115 @@
+from datetime import datetime, timedelta, date
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, Date, DateTime, func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.hybrid import hybrid_property
+
+engine = create_engine('sqlite:///library.db', echo=False)
+SessionLocal = sessionmaker(bind=engine)
+Base = declarative_base()
+
+
+class Author(Base):
+    __tablename__ = 'authors'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    surname = Column(String, nullable=False)
+
+
+class Book(Base):
+    __tablename__ = 'books'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    count = Column(Integer, default=1)
+    release_date = Column(Date, nullable=False)
+    author_id = Column(Integer, nullable=False)
+
+
+class Student(Base):
+    __tablename__ = 'students'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    surname = Column(String, nullable=False)
+    phone = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    average_score = Column(Float, nullable=False)
+    scholarship = Column(Boolean, nullable=False)
+
+    @classmethod
+    def get_scholarship_students(cls, session):
+        return session.query(cls).filter_by(scholarship=True).all()
+
+    @classmethod
+    def get_high_score_students(cls, session, min_score):
+        return session.query(cls).filter(cls.average_score > min_score).all()
+
+
+class ReceivingBook(Base):
+    __tablename__ = 'receiving_books'
+    id = Column(Integer, primary_key=True)
+    book_id = Column(Integer, nullable=False)
+    student_id = Column(Integer, nullable=False)
+    date_of_issue = Column(DateTime, nullable=False)
+    date_of_return = Column(DateTime)
+
+    @hybrid_property
+    def count_date_with_book(self):
+        if self.date_of_return:
+            delta = self.date_of_return - self.date_of_issue
+        else:
+            delta = datetime.now() - self.date_of_issue
+        return delta.days
+
+    @count_date_with_book.expression
+    def count_date_with_book(cls):
+        """SQL-выражение для фильтров"""
+        return (func.coalesce(cls.date_of_return, func.now()) - cls.date_of_issue)
+
+
+def init_test_data():
+    """Заполняет БД тестовыми данными"""
+    Base.metadata.create_all(engine)
+
+    session = SessionLocal()
+    session.query(ReceivingBook).delete()
+    session.query(Student).delete()
+    session.query(Book).delete()
+    session.query(Author).delete()
+    session.commit()
+
+    authors = [
+        Author(name='Лев', surname='Толстой'),
+        Author(name='Фёдор', surname='Достоевский'),
+        Author(name='Антон', surname='Чехов')
+    ]
+    session.add_all(authors)
+
+    books = [
+        Book(name='Война и мир', count=3, release_date=date(1869, 1, 1), author_id=1),
+        Book(name='Преступление и наказание', count=2, release_date=date(1866, 1, 1), author_id=2),
+        Book(name='Вишнёвый сад', count=5, release_date=date(1904, 1, 1), author_id=3),
+        Book(name='Анна Каренина', count=1, release_date=date(1877, 1, 1), author_id=1)
+    ]
+    session.add_all(books)
+
+    students = [
+        Student(name='Валентин', surname='Захаров', phone='+375291234567', email='artem@example.com', average_score=4.5,
+                scholarship=True),
+        Student(name='Иван', surname='Иванов', phone='+375291234568', email='ivan@example.com', average_score=3.2,
+                scholarship=False),
+        Student(name='Мария', surname='Петрова', phone='+375291234569', email='maria@example.com', average_score=4.8,
+                scholarship=True)
+    ]
+    session.add_all(students)
+
+    now = datetime.now()
+    session.add_all([
+        ReceivingBook(book_id=1, student_id=1, date_of_issue=now - timedelta(days=5), date_of_return=None),
+        ReceivingBook(book_id=2, student_id=2, date_of_issue=now - timedelta(days=20), date_of_return=None),
+        ReceivingBook(book_id=3, student_id=3, date_of_issue=now - timedelta(days=3),
+                      date_of_return=now - timedelta(days=1))
+    ])
+
+    session.commit()
+    session.close()
+    print("Тестовые данные загружены!")

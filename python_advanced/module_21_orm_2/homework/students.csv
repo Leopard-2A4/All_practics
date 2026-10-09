@@ -1,0 +1,4 @@
+name;surname;average_score;phone;email;scholarship
+Новый;Студент;4.2;+375299876543;new@example.com;True
+Катя;Сидорова;3.9;+375299876544;kate@example.com;False
+Олег;Петров;4.7;+375299876545;oleg@example.com;True
